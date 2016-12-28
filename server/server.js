@@ -14,8 +14,21 @@ var Todo = mongoose.model('Todo', {
   }
 });
 
+// var newTodo = new Todo({
+//   text: 'Cook dinner'
+// });
+//
+// newTodo.save().then((doc) => {
+//   console.log('Saved todo', doc);
+// }, (err) => {
+//   console.log('Unable to save todo');
+// });
+
+
 var newTodo = new Todo({
-  text: 'Cook dinner'
+  text: 'Cook dinner',
+  completed: false,
+  completedAt: -1
 });
 
 newTodo.save().then((doc) => {

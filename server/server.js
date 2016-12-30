@@ -13,7 +13,7 @@ const app = express();
 const port = process.env.PORT;
 
 app.use(bodyParser.json());
-//post toods
+//post todos
 app.post('/todos', (req, res) => {
   var todo = new Todo({
     text: req.body.text
@@ -32,6 +32,17 @@ app.get('/todos', (req, res) => {
     res.status(400).send(err);
   });
 });
+//post users
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new Users(body);
+  user.save().then((doc) => {
+    res.send(doc);
+  }, (err) => {
+    res.status(400).send(err);
+  });
+});
+
 //get todos by id
 app.get('/todos/:id', (req, res) => {
   var id = req.params.id;

@@ -4,6 +4,7 @@ const _ = require('lodash');
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
 const {Users} = require('./models/user');
+const {authenticate} = require('./middleware/authenticate');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -36,6 +37,10 @@ app.post('/users', (req, res) => {
   }).catch((err) => {
     res.status(400).send(err);
   });
+});
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
 });
 
 //get todos

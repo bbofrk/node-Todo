@@ -30,7 +30,6 @@ app.post('/users', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   var user = new Users(body);
   user.save().then(() => {
-    // res.send(doc);
     return user.generateAuthToken();
   }).then((token) => {
     res.header('x-auth', token).send(user);

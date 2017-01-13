@@ -45,11 +45,12 @@ app.get('/users/me', authenticate, (req, res) => {
 app.post('/users/login', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   Users.findByCredentials(body.email, body.password).then((user) => {
-    // res.send(user);
-    User.generateAuthToken().then((token) => {
+    return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
     });
+    // res.send(user);
   }).catch((err) => {
+    // console.log(err);
     res.status(400).send();
   });
 });

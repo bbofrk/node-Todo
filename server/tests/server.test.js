@@ -74,11 +74,19 @@ describe('GET /todos', () => {
         })
         .end(done);
     });
+    it('should not todo by id created by ID', (done) => {
+      request(app)
+        .get(`/todos/${todos[1]._id.toHexString()}`)
+        .set('x-auth', users[0].tokens[0].token)
+        .expect(404)
+        .end(done);
+    });
 
     it('should get 404 if todo not found', (done) => {
       var hexId = new ObjectID().toHexString();
       request(app)
         .get(`/todos/${hexId}`)
+        .set('x-auth', users[0].tokens[0].token)
         .expect(404)
         .end(done);
     });
@@ -86,6 +94,7 @@ describe('GET /todos', () => {
     it('should get 404 for non-object ids', (done) => {
       request(app)
         .get(`/todos/123`)
+        .set('x-auth', users[0].tokens[0].token)
         .expect(404)
         .end(done);
     });
@@ -94,9 +103,10 @@ describe('GET /todos', () => {
 
 describe('DELETE/todos/:id', () => {
   it('should remove a todo', (done) => {
-    var hexId = todos[0]._id.toHexString();
+    var hexId = todos[1]._id.toHexString();
     request(app)
       .delete(`/todos/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
       .expect(200)
       .expect((res) => {
         expect(res.body.removedTodo._id).toBe(hexId);
@@ -112,10 +122,28 @@ describe('DELETE/todos/:id', () => {
       });
   });
 
+  it('should not remove a todo not created by user', (done) => {
+    var hexId = todos[0]._id.toHexString();
+    request(app)
+      .delete(`/todos/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
+      .expect(404)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        Todo.findById(hexId).then((todo) => {
+          expect(todo).toExist();
+          done();
+        }).catch((err) => done(err));
+      });
+  });
+
   it('should return 404 if todo not found', (done) => {
     var hexId = new ObjectID().toHexString();
     request(app)
       .delete(`/todos/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
       .expect(404)
       .end(done);
   });
@@ -124,6 +152,7 @@ describe('DELETE/todos/:id', () => {
     var hexId = 123;
     request(app)
       .delete(`/todos/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
       .expect(404)
       .end(done);
   });
@@ -135,6 +164,7 @@ describe('PATCH/todo/:id', () => {
     var tmpText = "updated for test 1";
     request(app)
       .patch(`/todos/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
       .send({
         text: tmpText,
         completed: true
@@ -148,10 +178,25 @@ describe('PATCH/todo/:id', () => {
       .end(done);
   });
 
+  it('should not update a todo not owned by user', (done) => {
+    var hexId = todos[0]._id.toHexString();
+    var tmpText = "updated for test 1";
+    request(app)
+      .patch(`/todos/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
+      .send({
+        text: tmpText,
+        completed: true
+      })
+      .expect(404)
+      .end(done);
+  });
+
   it('should clear compeltedAt when todo is not completed', (done) => {
     var hexId = todos[1]._id.toHexString();
     request(app)
       .patch(`/todos/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
       .send({
         completed: false
       })
